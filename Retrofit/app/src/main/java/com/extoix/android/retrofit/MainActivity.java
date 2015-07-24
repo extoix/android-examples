@@ -12,36 +12,14 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.http.GET;
-import retrofit.http.Path;
+import retrofit.http.Query;
 
 
 public class MainActivity extends ActionBarActivity {
-    public class Contributor {
 
-        private String login;
-        private int contributions;
-
-        public String getLogin() {
-            return login;
-        }
-
-        public void setLogin(String login) {
-            this.login = login;
-        }
-
-        public int getContributions() {
-            return contributions;
-        }
-
-        public void setContributions(int contributions) {
-            this.contributions = contributions;
-        }
-
-    }
-
-    public interface GitHub {
-        @GET("/repos/{owner}/{repo}/contributors")
-        void contributors(@Path("owner") String owner, @Path("repo") String repo, Callback<List<Contributor>> callback);
+    public interface TheMovieDB {
+        @GET("/3/discover/movie?")
+        void retrieveMovieDetailResult(@Query("sort_by") String sortBy, @Query("api_key") String apiKey, Callback<MovieDetailResult> callback);
     }
 
     @Override
@@ -49,21 +27,30 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint("https://api.github.com").build();
-        GitHub github = restAdapter.create(GitHub.class);
+        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint("http://api.themoviedb.org").build();
+        TheMovieDB theMovieDBService = restAdapter.create(TheMovieDB.class);
 
-        github.contributors("extoix", "android-examples", new Callback<List<Contributor>>() {
+        String sortBy = "popularity.desc";
+        String apiKey = getString(R.string.themoviedb_api_key);
+
+        theMovieDBService.retrieveMovieDetailResult(sortBy, apiKey, new Callback<MovieDetailResult>() {
             @Override
-            public void success(List<Contributor> contributors, Response response) {
-                Contributor contributor = contributors.get(0);
+            public void success(MovieDetailResult movieDetailResult, Response response) {
 
-                String login = contributor.getLogin();
-                int contributions = contributor.getContributions();
+                List<MovieDetail> movieDetailList = movieDetailResult.getResults();
+
+                for(MovieDetail movieDetail: movieDetailList) {
+                    String title = movieDetail.getTitle();
+                    String releaseDate = movieDetail.getRelease_date();
+                    String voteAverage = movieDetail.getVote_average();
+                    String posterPath = movieDetail.getPoster_path();
+                    String overview = movieDetail.getOverview();
+                }
             }
 
             @Override
             public void failure(RetrofitError error) {
-
+                String someErrorMessage = error.getMessage();
             }
         });
 
