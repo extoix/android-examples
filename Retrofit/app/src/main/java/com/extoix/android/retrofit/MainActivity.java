@@ -18,7 +18,7 @@ import retrofit.http.Query;
 public class MainActivity extends ActionBarActivity {
 
     public interface TheMovieDB {
-        @GET("/3/discover/movie?")
+        @GET("/3/discover/movie")
         void retrieveMovieDetailResult(@Query("sort_by") String sortBy, @Query("api_key") String apiKey, Callback<MovieDetailResult> callback);
     }
 
@@ -30,7 +30,7 @@ public class MainActivity extends ActionBarActivity {
         RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint("http://api.themoviedb.org").build();
         TheMovieDB theMovieDBService = restAdapter.create(TheMovieDB.class);
 
-        String sortBy = "popularity.desc";
+        String sortBy = "vote_average.desc";
         String apiKey = getString(R.string.themoviedb_api_key);
 
         theMovieDBService.retrieveMovieDetailResult(sortBy, apiKey, new Callback<MovieDetailResult>() {
