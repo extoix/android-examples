@@ -1,0 +1,56 @@
+package com.extoix.example.settingsmenu;
+
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+/**
+ *  Created an empty activity, the generated settings activity generates a lot of stuff
+ *  - SettingsActivity, change what the activity extends and implements
+ *  - SettingsActivity, implement and override the onPreferenceChange method
+ *  - AndroidManifest.xml, register the SettingsActivity and set the parent activity to MainActivity
+ *  - MainActivity, implement the onOptionsItemSelected method and set intent to start SettingsActivity
+ *  - pref_general, create an xml resource to store configuration information for an edit preference
+ *  - SettingsActivity, modify onCreate method to look up the preference and bind a listener to the preference key
+ *  - MainActivityFragment, retrieve and use shared preferences
+ */
+public class SettingsActivity extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        addPreferencesFromResource(R.xml.pref_general);
+
+        bindPreferenceListener(findPreference(getString(R.string.pref_key)));
+        bindPreferenceListener(findPreference(getString(R.string.pref_units_key)));
+    }
+
+    private void bindPreferenceListener(Preference preference) {
+        preference.setOnPreferenceChangeListener(this);
+        onPreferenceChange(preference, PreferenceManager.getDefaultSharedPreferences(preference.getContext()).getString(preference.getKey(), ""));
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object value) {
+
+        String stringValue = value.toString();
+
+        if (preference instanceof ListPreference) {
+        // For list preferences, look up the correct display value in
+        // the preference's 'entries' list (since they have separate labels/values).
+            ListPreference listPreference = (ListPreference) preference;
+            int prefIndex = listPreference.findIndexOfValue(stringValue);
+            if (prefIndex >= 0) {
+                preference.setSummary(listPreference.getEntries()[prefIndex]);
+            }
+        } else {
+            // For other preferences, set the summary to the value's simple string representation.
+            preference.setSummary(stringValue);
+        }
+
+        return false;
+    }
+}
